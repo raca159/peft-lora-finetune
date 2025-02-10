@@ -1,0 +1,1 @@
+docker run --rm -it --gpus all  -p 8888:8888 -v `pwd`:/app pefttrainer bash -c "cd /app && export HF_HOME='/app/cache' && jupyter notebook --ip=0.0.0.0 --port=8888 --no-browser --allow-root"

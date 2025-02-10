@@ -24,7 +24,7 @@ if __name__ == '__main__':
                                 for tf32now in tf32:
                                     for dataset_size in dataset_size:
                                         # Run the training script with the set of hyperparameters
-                                        cmd = f'python train.py --lora_r {lora_r} --model_name {model_name} --max_steps {max_stepsnow} --learning_rate {learning_rate} --dataset_size {dataset_size}'
+                                        cmd = f'python3 train.py --lora_r {lora_r} --model_name {model_name} --max_steps {max_stepsnow} --learning_rate {learning_rate} --dataset_size {dataset_size}'
                                         if qloranow:
                                             cmd += " --use_qlora"
                                         if gradient_checkpointingnow:

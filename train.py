@@ -14,7 +14,6 @@ from peft import get_peft_model
 from trl import SFTConfig
 
 load_dotenv()
-wandb.login(key=os.environ["WANDB_API"])
 
 dataset_path = "glaiveai/glaive-function-calling-v2"
 temp_dir = 'dataset_dir'
@@ -59,6 +58,11 @@ if __name__ == '__main__':
 
     output_dir_final = os.path.join(output_dir, run_name)
 
+    if os.path.exists(output_dir_final):
+        print(f"Output directory {output_dir_final} already exists. Skipping training.")
+        exit()
+        
+    wandb.login(key=os.environ["WANDB_API"])
     lora_config = get_lora_config(lora_r, lora_alpha, use_qlora)
     model, tokenizer = load_model_lora(model_name, max_seq_length, use_qlora)
 

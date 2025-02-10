@@ -2,3 +2,7 @@
 cache
 __pycache__
 *.pyc
+dataset_dir
+results
+results_back
+wandb

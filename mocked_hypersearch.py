@@ -6,7 +6,7 @@ lora_rv= [4, 8, 16]
 model_names = ["HuggingFaceTB/SmolLM2-135M-Instruct", "HuggingFaceTB/SmolLM2-360M-Instruct"]
 bf16 = [True]
 max_steps = [350]
-learning_rates = [2e-4, 5e-4]
+learning_rates = [2e-4, 5e-4, 1e-4]
 gradient_checkpointing = [True]
 tf32 = [True]
 dataset_sizes = ["small", "medium"]
@@ -25,9 +25,11 @@ if __name__ == '__main__':
                                     for dataset_size in dataset_sizes:
                                         if model_name == "HuggingFaceTB/SmolLM2-360M-Instruct" and dataset_size == "medium":
                                             continue
+                                        if dataset_size == "medium" and learning_rate == 1e-4:
+                                            continue
                                         if model_name == "HuggingFaceTB/SmolLM2-360M-Instruct" and lora_r == 16:
                                             continue
-                                        if model_name == "HuggingFaceTB/SmolLM2-135M-Instruct" and use_qlora:
+                                        if model_name == "HuggingFaceTB/SmolLM2-135M-Instruct" and qloranow:
                                             continue
                                         # Run the training script with the set of hyperparameters
                                         cmd = f'python3 train.py --lora_r {lora_r} --model_name {model_name} --max_steps {max_stepsnow} --learning_rate {learning_rate} --dataset_size {dataset_size}'

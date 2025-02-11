@@ -104,9 +104,9 @@ def get_train_dataset(dataset_name, temp_dir, tokenizer, max_seq_length, dataset
     if chat_text_only:
         sufix = '_text'
 
-    if os.path.exists(os.path.join(temp_dir, f"dataset_train_eval{sufix}")):
+    if os.path.exists(os.path.join(temp_dir, f"dataset_train_eval{sufix}_{dataset_size}")):
         dataset_train_eval = load_from_disk(
-            os.path.join(temp_dir, f"dataset_train_eval{sufix}")
+            os.path.join(temp_dir, f"dataset_train_eval{sufix}_{dataset_size}")
         )
         return dataset_train_eval
 
@@ -157,5 +157,5 @@ def get_train_dataset(dataset_name, temp_dir, tokenizer, max_seq_length, dataset
     dataset_train_eval = dataset_train.train_test_split(test_size=train_eval_split)
 
     # save to disk
-    dataset_train_eval.save_to_disk(os.path.join(temp_dir, f"dataset_train_eval{sufix}"))
+    dataset_train_eval.save_to_disk(os.path.join(temp_dir, f"dataset_train_eval{sufix}_{dataset_size}"))
     return dataset_train_eval

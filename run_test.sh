@@ -1,0 +1,1 @@
+docker run --rm -it --gpus all -v `pwd`:/app pefttrainer bash -c "cd /app && export HF_HOME="/app/cache" && python3 test.py"

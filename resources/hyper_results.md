@@ -1,0 +1,27 @@
+| model_name | LoRA r | dataset_size | quantized | learning_rate | final eval loss |
+| - | - | - | - | - | - |
+| SmolLM2-360M-Instruct | 4 | small | false | 0.0005 | 0.16702 |
+| SmolLM2-360M-Instruct | 8 | small | false | 0.0005 | 0.17016 |
+| SmolLM2-360M-Instruct | 4 | small | true | 0.0005 | 0.17071 |
+| SmolLM2-360M-Instruct | 8 | small | true | 0.0005 | 0.17121 |
+| SmolLM2-135M-Instruct | 4 | medium | false | 0.0005 | 0.17130 |
+| SmolLM2-360M-Instruct | 4 | small | true | 0.0002 | 0.17333 |
+| SmolLM2-360M-Instruct | 4 | small | false | 0.0002 | 0.17467 |
+| SmolLM2-360M-Instruct | 8 | small | false | 0.0002 | 0.18794 |
+| SmolLM2-135M-Instruct | 8 | medium | false | 0.0005 | 0.18854 |
+| SmolLM2-360M-Instruct | 4 | small | false | 0.0001 | 0.19069 |
+| SmolLM2-360M-Instruct | 8 | small | true | 0.0002 | 0.19377 |
+| SmolLM2-135M-Instruct | 4 | small | false | 0.0005 | 0.19940 |
+| SmolLM2-135M-Instruct | 16 | small | false | 0.0005 | 0.20226 |
+| SmolLM2-135M-Instruct | 16 | medium | false | 0.0005 | 0.20242 |
+| SmolLM2-135M-Instruct | 4 | medium | false | 0.0002 | 0.20774 |
+| SmolLM2-135M-Instruct | 8 | small | false | 0.0005 | 0.21265 |
+| SmolLM2-360M-Instruct | 8 | small | false | 0.0001 | 0.21429 |
+| SmolLM2-135M-Instruct | 4 | small | false | 0.0002 | 0.22343 |
+| SmolLM2-135M-Instruct | 8 | medium | false | 0.0002 | 0.25278 |
+| SmolLM2-135M-Instruct | 4 | small | false | 0.0001 | 0.26428 |
+| SmolLM2-135M-Instruct | 8 | small | false | 0.0002 | 0.26713 |
+| SmolLM2-135M-Instruct | 16 | medium | false | 0.0002 | 0.27905 |
+| SmolLM2-135M-Instruct | 16 | small | false | 0.0002 | 0.27949 |
+| DeepSeek-R1-Distill-Qwen-1.5B | 4 | small | false | 0.0001 | 0.28401 |
+| SmolLM2-135M-Instruct | 8 | small | false | 0.0001 | 0.31397 |

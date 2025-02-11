@@ -4,8 +4,7 @@ import warnings
 import torch
 from datasets import Dataset
 from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
-from peft import LoraConfig
-
+from peft import LoraConfig, PeftModel
 
 class CustomSFTTrainer(SFTTrainer):
 
@@ -70,7 +69,7 @@ def get_model_run_str(model_name, lora_r, use_qlora, dataset_size, learning_rate
     run_name = f"{model_name.split('/')[-1]}-fncall_peft-ds_{dataset_size}-lora_r_{lora_r}-use_qlora_{use_qlora}-lr_{lr}"
     return run_name
 
-def load_model_lora(model_name, max_seq_length, use_qlora=False):
+def load_model_lora(model_name, max_seq_length, use_qlora=False, use_flash_attention=False):
     bnb_config = None
     if use_qlora:
         bnb_config = BitsAndBytesConfig(
@@ -80,12 +79,18 @@ def load_model_lora(model_name, max_seq_length, use_qlora=False):
             bnb_4bit_compute_dtype=torch.bfloat16,
         )
 
+    additional_config = {}
+    if use_flash_attention:
+        additional_config = dict(
+            torch_dtype=torch.bfloat16,
+            attn_implementation="flash_attention_2"
+        )
+
     model = AutoModelForCausalLM.from_pretrained(
         model_name,
         device_map="auto",
         quantization_config=bnb_config,
-        # torch_dtype=torch.bfloat16,
-        # attn_implementation="flash_attention_2"
+        **additional_config
     )
     tokenizer = AutoTokenizer.from_pretrained(
         model_name, padding=True, truncation=True, max_length=max_seq_length
@@ -108,6 +113,11 @@ def get_lora_config(lora_r=8, lora_alpha=32, use_qlora=False, inference_mode=Fal
 def run_inout_pipe(chat_interaction, tokenizer, model):
     prompt = tokenizer.apply_chat_template(chat_interaction, tokenize=False, add_generation_prompt=True)
     inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
-    outputs = model.generate(**inputs, max_new_tokens=128, pad_token_id=tokenizer.eos_token_id)
+    outputs = model.generate(**inputs, max_new_tokens=512, pad_token_id=tokenizer.eos_token_id)
     outputs = outputs[:, inputs['input_ids'].shape[-1]:]
     return tokenizer.decode(outputs[0], skip_special_tokens=True)
+
+def local_load_peft_model(model_name, lora_checkpoint_path, max_seq_length, use_qlora=False, use_flash_attention=False):
+    model, tokenizer = load_model_lora(model_name, max_seq_length, use_qlora=use_qlora, use_flash_attention=use_flash_attention)
+    peft_model = PeftModel.from_pretrained(model, lora_checkpoint_path)
+    return peft_model, tokenizer

@@ -64,10 +64,10 @@ if __name__ == '__main__':
         
     wandb.login(key=os.environ["WANDB_API"])
     lora_config = get_lora_config(lora_r, lora_alpha, use_qlora)
-    model, tokenizer = load_model_lora(model_name, max_seq_length, use_qlora)
+    model, tokenizer = load_model_lora(model_name, max_seq_length, use_qlora, use_flash_attention=True)
 
     dataset_train_eval = get_train_dataset(
-        dataset_path, temp_dir, tokenizer, max_seq_length, dataset_size, True,
+        dataset_path, temp_dir, dataset_size,
         train_eval_split, train_test_split, seed
     )
 

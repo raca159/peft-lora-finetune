@@ -1,8 +1,13 @@
 import multiprocessing
 import os
 import re
-from functools import partial
 from datasets import load_from_disk, load_dataset, concatenate_datasets
+
+def clear_message(msg_str):
+  msg_str_ = msg_str.replace(" <|endoftext|>", "").strip()
+  if 'functioncall>' in msg_str_: # handle annoying "\'" element inside function json
+    msg_str_ = msg_str_.replace("'", '')
+  return msg_str_
 
 def chat_str_to_chat_list(chat_str):
     try:
@@ -15,14 +20,12 @@ def chat_str_to_chat_list(chat_str):
         r"(USER|ASSISTANT):\s(.*?)(?=\n\n|$)", chat_until_function_call, re.DOTALL
     )
     chat_interaction = [
-        (matchh[0], matchh[1].replace(" <|endoftext|>", "").strip())
+        (matchh[0], clear_message(matchh[1]))
         for matchh in matches
     ]
     return chat_interaction
 
-def transform_dataset_to_chatdict_format(
-    tokenize_model, transform_to_text, data_from_sample
-):
+def transform_dataset_to_chatdict_format(data_from_sample):
     texts = []
     system_prompts = list(
         map(lambda x: re.split("SYSTEM\:\s", x)[1].strip(), data_from_sample["system"])
@@ -32,10 +35,6 @@ def transform_dataset_to_chatdict_format(
         messages = [{"role": "system", "content": systemprompt}] + [
             {"role": role.lower(), "content": msg} for role, msg in chatnow
         ]
-        if transform_to_text:
-            messages = tokenize_model.apply_chat_template(
-                messages, add_generation_prompt=False, tokenize=False
-            )
         texts.append(messages)
     return {"messages": texts}
 
@@ -89,7 +88,7 @@ def get_test_dataset(dataset_name, temp_dir, train_test_split=0.01, seed=42):
         range(dataset_reduced.num_rows - test_amount, dataset_reduced.num_rows)
     )
     dataset_inference_test = dataset_reduced_test.map(
-        partial(transform_dataset_to_chatdict_format, None, False),
+        transform_dataset_to_chatdict_format,
         batched=True,
         remove_columns=dataset_reduced_test.column_names,
     )
@@ -98,11 +97,8 @@ def get_test_dataset(dataset_name, temp_dir, train_test_split=0.01, seed=42):
     )
     return dataset_inference_test
 
-def get_train_dataset(dataset_name, temp_dir, tokenizer, max_seq_length, dataset_size, chat_text_only=False, train_eval_split=0.1, train_test_split=0.01, seed=42):
-
-    sufix = ''
-    if chat_text_only:
-        sufix = '_text'
+def get_train_dataset(dataset_name, temp_dir, dataset_size, train_eval_split=0.1, train_test_split=0.01, seed=42):
+    sufix = '_text'
 
     if os.path.exists(os.path.join(temp_dir, f"dataset_train_eval{sufix}_{dataset_size}")):
         dataset_train_eval = load_from_disk(
@@ -118,7 +114,6 @@ def get_train_dataset(dataset_name, temp_dir, tokenizer, max_seq_length, dataset
     dataset_reduced_train = dataset_reduced.select(
         range(dataset_reduced.num_rows - test_amount)
     )
-
 
     # balance and limit dataset with found and not found functioncall examples
     dataset_train_missed = dataset_reduced_train.filter(
@@ -136,23 +131,11 @@ def get_train_dataset(dataset_name, temp_dir, tokenizer, max_seq_length, dataset
     dataset_final_train = concatenate_datasets(
         [dataset_train_missed, dataset_train_found]
     )
-    if not chat_text_only:
-        dataset_train = dataset_final_train.map(
-            partial(transform_dataset_to_chatdict_format, tokenizer, True),
-            batched=True,
-            remove_columns=dataset_final_train.column_names,
-        )
-        dataset_train = dataset_train.map(
-            partial(tokenize_text, tokenizer, max_seq_length),
-            batched=True,
-            remove_columns=dataset_train.column_names,
-        )
-    else:
-        dataset_train = dataset_final_train.map(
-            partial(transform_dataset_to_chatdict_format, None, False),
-            batched=True,
-            remove_columns=dataset_final_train.column_names,
-        )
+    dataset_train = dataset_final_train.map(
+        transform_dataset_to_chatdict_format,
+        batched=True,
+        remove_columns=dataset_final_train.column_names,
+    )
     # split between train and validation
     dataset_train_eval = dataset_train.train_test_split(test_size=train_eval_split)
 
